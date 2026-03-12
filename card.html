@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Digital Card</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0e0d;
+    --ac: #c8471a;
+    --paper: #f5f0e8;
+    --muted: rgba(255,255,255,0.45);
+    --border: rgba(255,255,255,0.1);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow-x: hidden;
+  }
+
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 30%, rgba(200,71,26,0.15) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 80% 70%, rgba(184,151,58,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    animation: breathe 8s ease-in-out infinite alternate;
+  }
+
+  @keyframes breathe {
+    from { opacity: 0.7; }
+    to { opacity: 1; }
+  }
+
+  /* Grain */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0.6;
+  }
+
+  .card {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.06),
+      0 24px 64px rgba(0,0,0,0.5),
+      0 4px 16px rgba(0,0,0,0.3);
+    animation: riseIn 0.7s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  @keyframes riseIn {
+    from { opacity: 0; transform: translateY(32px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Decorative top bar */
+  .card-topbar {
+    height: 3px;
+    background: linear-gradient(90deg, var(--ac), transparent);
+  }
+
+  .card-header {
+    padding: 36px 36px 28px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  /* Corner decorations */
+  .corner-mark {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-color: rgba(255,255,255,0.15);
+    border-style: solid;
+  }
+  .corner-mark.tr { top: 16px; right: 16px; border-width: 1px 1px 0 0; }
+  .corner-mark.bl { bottom: 16px; left: 16px; border-width: 0 0 1px 1px; }
+
+  .header-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--ac);
+    flex-shrink: 0;
+    animation: riseIn 0.7s 0.1s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  .avatar-placeholder {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 1px dashed rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: rgba(255,255,255,0.2);
+    font-size: 28px;
+  }
+
+  .name-block { flex: 1; }
+
+  .card-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 4px;
+    animation: riseIn 0.7s 0.15s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  .card-title {
+    font-size: 13px;
+    color: var(--ac);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    margin-bottom: 2px;
+    animation: riseIn 0.7s 0.2s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  .card-company {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    animation: riseIn 0.7s 0.22s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  .card-bio {
+    margin-top: 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.6);
+    font-style: italic;
+    font-family: 'DM Serif Display', serif;
+    animation: riseIn 0.7s 0.25s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  /* CONTACT SECTION */
+  .card-contacts {
+    padding: 24px 36px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .contact-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    animation: riseIn 0.7s cubic-bezier(0.22,1,0.36,1) both;
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+
+  .contact-row:hover { opacity: 0.75; }
+
+  .contact-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--ac);
+    font-size: 15px;
+  }
+
+  .contact-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  .contact-value {
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    font-weight: 400;
+  }
+
+  /* SOCIAL */
+  .card-socials {
+    padding: 20px 36px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .social-chip {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    background: rgba(255,255,255,0.04);
+    transition: all 0.2s;
+    font-weight: 500;
+    animation: riseIn 0.7s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  .social-chip:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border-color: rgba(255,255,255,0.25);
+  }
+
+  .social-chip .si { font-size: 13px; }
+
+  /* SAVE BUTTON */
+  .card-footer {
+    padding: 24px 36px;
+  }
+
+  .save-btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--ac);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .save-btn:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(200,71,26,0.35);
+  }
+
+  .save-btn:active { transform: scale(0.99); }
+
+  /* Error state */
+  .error-state {
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    padding: 60px 40px;
+  }
+
+  .error-state .e-icon { font-size: 48px; margin-bottom: 16px; }
+  .error-state p { font-size: 14px; line-height: 1.6; }
+
+  /* Powered by */
+  .powered {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    z-index: 20;
+  }
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+  <div id="cardContent">
+    <div style="color:rgba(255,255,255,0.3);text-align:center;padding:60px 24px;">Loading card...</div>
+  </div>
+</div>
+
+<div class="powered">CardForge · Digital Business Card</div>
+
+<script>
+function getParam() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('data');
+}
+
+function decodeData(encoded) {
+  try {
+    return JSON.parse(decodeURIComponent(escape(atob(encoded))));
+  } catch(e) {
+    return null;
+  }
+}
+
+function iconFor(type) {
+  const icons = {
+    email: '✉',
+    phone: '☎',
+    website: '🌐',
+  };
+  return icons[type] || '→';
+}
+
+function formatLink(type, value) {
+  if (!value) return '#';
+  if (type === 'email') return `mailto:${value}`;
+  if (type === 'phone') return `tel:${value.replace(/\s/g,'')}`;
+  if (type === 'website') {
+    return value.startsWith('http') ? value : `https://${value}`;
+  }
+  return '#';
+}
+
+function socialIcon(type) {
+  const map = {
+    li: 'in',
+    ig: 'ig',
+    tw: 'x',
+    gh: 'gh',
+  };
+  return map[type] || type;
+}
+
+function socialLabel(type) {
+  const map = {
+    li: 'LinkedIn',
+    ig: 'Instagram',
+    tw: 'Twitter / X',
+    gh: 'GitHub',
+  };
+  return map[type] || type;
+}
+
+function socialURL(type, value) {
+  if (!value) return '#';
+  if (value.startsWith('http')) return value;
+  if (type === 'li') return `https://${value}`;
+  if (type === 'ig') return `https://instagram.com/${value.replace('@','')}`;
+  if (type === 'tw') return `https://x.com/${value.replace('@','')}`;
+  if (type === 'gh') return `https://${value}`;
+  return `https://${value}`;
+}
+
+function makeVCF(d) {
+  const lines = [
+    'BEGIN:VCARD',
+    'VERSION:3.0',
+    `FN:${d.n || ''}`,
+    d.t ? `TITLE:${d.t}` : '',
+    d.c ? `ORG:${d.c}` : '',
+    d.e ? `EMAIL:${d.e}` : '',
+    d.p ? `TEL:${d.p}` : '',
+    d.w ? `URL:${d.w.startsWith('http') ? d.w : 'https://' + d.w}` : '',
+    d.li ? `X-SOCIALPROFILE;type=linkedin:${d.li}` : '',
+    d.ig ? `X-SOCIALPROFILE;type=instagram:${d.ig}` : '',
+    d.tw ? `X-SOCIALPROFILE;type=twitter:${d.tw}` : '',
+    d.gh ? `X-SOCIALPROFILE;type=github:${d.gh}` : '',
+    d.b ? `NOTE:${d.b}` : '',
+    d.av ? `PHOTO;ENCODING=b;TYPE=JPEG:${d.av.split(',')[1] || ''}` : '',
+    'END:VCARD',
+  ].filter(Boolean).join('\r\n');
+  return lines;
+}
+
+function saveContact(d) {
+  const vcf = makeVCF(d);
+  const blob = new Blob([vcf], { type: 'text/vcard' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${(d.n || 'contact').replace(/\s+/g,'-')}.vcf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function renderCard(d) {
+  // Apply colors
+  if (d.bg) document.documentElement.style.setProperty('--bg', d.bg);
+  if (d.ac) document.documentElement.style.setProperty('--ac', d.ac);
+  document.body.style.background = d.bg || '#0f0e0d';
+
+  const socials = ['li','ig','tw','gh'].filter(k => d[k]);
+  const contacts = [
+    { type: 'email', value: d.e, label: 'Email' },
+    { type: 'phone', value: d.p, label: 'Phone' },
+    { type: 'website', value: d.w, label: 'Website' },
+  ].filter(c => c.value);
+
+  const avatarHTML = d.av
+    ? `<img class="avatar" src="${d.av}" alt="photo"/>`
+    : `<div class="avatar-placeholder">◌</div>`;
+
+  const delayBase = 0.3;
+
+  const contactsHTML = contacts.map((c, i) => `
+    <a class="contact-row" href="${formatLink(c.type, c.value)}" style="animation-delay:${delayBase + i*0.07}s">
+      <div class="contact-icon">${iconFor(c.type)}</div>
+      <div>
+        <div class="contact-label">${c.label}</div>
+        <div class="contact-value">${c.value}</div>
+      </div>
+    </a>
+  `).join('');
+
+  const socialsHTML = socials.map((k, i) => `
+    <a class="social-chip" href="${socialURL(k, d[k])}" target="_blank" style="animation-delay:${delayBase + contacts.length*0.07 + i*0.07}s">
+      <span class="si">${socialIcon(k)}</span>
+      <span>${socialLabel(k)}</span>
+    </a>
+  `).join('');
+
+  document.getElementById('cardContent').innerHTML = `
+    <div class="card-topbar"></div>
+
+    <div class="card-header">
+      <div class="corner-mark tr"></div>
+      <div class="corner-mark bl"></div>
+      <div class="header-inner">
+        ${avatarHTML}
+        <div class="name-block">
+          <div class="card-name">${d.n || 'No Name'}</div>
+          ${d.t ? `<div class="card-title">${d.t}</div>` : ''}
+          ${d.c ? `<div class="card-company">${d.c}</div>` : ''}
+        </div>
+      </div>
+      ${d.b ? `<div class="card-bio">"${d.b}"</div>` : ''}
+    </div>
+
+    ${contacts.length > 0 ? `<div class="card-contacts">${contactsHTML}</div>` : ''}
+    ${socials.length > 0 ? `<div class="card-socials">${socialsHTML}</div>` : ''}
+
+    <div class="card-footer">
+      <button class="save-btn" onclick="saveContact(window.__cardData)">
+        ↓ Save to Contacts
+      </button>
+    </div>
+  `;
+
+  window.__cardData = d;
+}
+
+function renderError() {
+  document.getElementById('cardContent').innerHTML = `
+    <div class="error-state">
+      <div class="e-icon">⬛</div>
+      <p>No card data found.<br/>Generate your card using the <strong>generator.html</strong> file.</p>
+    </div>
+  `;
+}
+
+// INIT
+const encoded = getParam();
+if (encoded) {
+  const data = decodeData(encoded);
+  if (data) {
+    // Try to restore avatar from localStorage (set by generator for local preview)
+    if (!data.av) {
+      try {
+        const stored = localStorage.getItem('cardforge_avatar_' + encoded.slice(0,20));
+        if (stored) data.av = stored;
+      } catch(e) {}
+    }
+    renderCard(data);
+  }
+  else renderError();
+} else {
+  renderError();
+}
+</script>
+</body>
+</html>
